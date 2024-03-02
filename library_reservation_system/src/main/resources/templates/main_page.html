@@ -110,7 +110,9 @@
             const endTimeISOString = endTime.toISOString();
 
 
-            fetch('http://localhost:8080/reservation', {
+            const currentUrl = window.location.href;
+            const reserveUrl = currentUrl.replace("/main",'/reservation')
+            fetch(reserveUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -133,9 +135,10 @@
                 });
         }
     }
-
+    const curUrl = window.location.href;
+    const reservedSeatUrl = curUrl.replace("/main",'/reserved-seats-api');
     function fetchReservedSeats() {
-        fetch('http://localhost:8080/reserved-seats-api') // 실제 서버 API 경로로 변경
+        fetch(reservedSeatUrl) // 실제 서버 API 경로로 변경
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');

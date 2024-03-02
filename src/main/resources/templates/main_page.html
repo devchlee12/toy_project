@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page - 도서관 좌석 예약</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: block;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .seating-chart {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+            margin: 20px;
+        }
+        .seat {
+            width: 30px;
+            height: 30px;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 14px;
+        }
+        .seat.reserved {
+            background-color: #F44336;
+            cursor: not-allowed;
+        }
+        #availableSeatsList {
+            margin-top: 20px;
+        }
+        #availableSeatsList li {
+            background-color: #fff;
+            margin-bottom: 5px;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            list-style-type: none; /* Remove default list style */
+        }
+        .logout {
+            background-color: #fff;
+            margin-bottom: 5px;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">
+</head>
+<body>
+<!-- 네비게이션바 -->
+<nav th:replace="~{navbar :: navbarFragment}"></nav>
+<div th:if="${seat != null}" class="alert alert-primary" role="alert" th:text="|나의 좌석 : ${seat}번|">
+</div>
+<div class="seating-chart" id="seatingChart"></div>
+<div class="d-grid gap-2">
+    <a th:href="@{/cancelreservation}" class="btn btn-danger">좌석반납</a>
+</div>
+<ol id="availableSeatsList"></ol> <!-- 사용 가능한 좌석 목록을 위한 컨테이너 -->
+<script th:src="@{/bootstrap.min.js}"></script>
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        const seatingChart = document.getElementById('seatingChart');
+        generateSeats(seatingChart);
+        fetchReservedSeats();
+    });
+
+    function generateSeats(seatingChart) {
+        for (let i = 1; i <= 50; i++) {
+            const seat = document.createElement('div');
+            seat.className = 'seat';
+            seat.textContent = i;
+            seat.addEventListener('click', function() { reserveSeat(i); });
+            seatingChart.appendChild(seat);
+        }
+    }
+
+    function reserveSeat(seatNumber) {
+        const seat = document.querySelector(`.seating-chart .seat:nth-child(${seatNumber})`);
+        if (seat.classList.contains('reserved')) {
+            alert('이미 예약된 좌석입니다.');
+            return;
+        }
+
+        const hours = prompt('사용할 시간을 시간 단위로 입력해주세요. (예: 3)');
+        if (hours) {
+            const parsedHours = parseInt(hours, 10);
+            if (isNaN(parsedHours) || parsedHours <= 0) {
+                alert('올바른 시간을 입력해주세요.');
+                return;
+            }
+            else if(parsedHours > 6) {
+                alert('최대 6시간 까지만 사용할 수 있습니다.')
+                return;
+            }
+
+            const offset = new Date().getTimezoneOffset() * 60000;
+            const endTime = new Date(Date.now() - offset);
+            endTime.setHours(endTime.getHours() + parsedHours);
+            const endTimeISOString = endTime.toISOString();
+
+
+            fetch('http://localhost:8080/reservation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ num: seatNumber, date: endTimeISOString})
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    //seat.classList.add('reserved');
+                    seat.title = `예약 종료 시간: ${endTimeISOString.toLocaleString().slice(0,10)}`;
+                    alert(`좌석 ${seatNumber}가 ${endTimeISOString.toLocaleString().slice(0,10)}까지 예약되었습니다.`);
+                    history.go(0);
+                    fetchReservedSeats(); // 예약 상태를 새로 고침합니다.
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('예약에 실패했습니다.');
+                });
+        }
+    }
+
+    function fetchReservedSeats() {
+        fetch('http://localhost:8080/reserved-seats-api') // 실제 서버 API 경로로 변경
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                updateReservedSeats(data); // 서버에서 받은 데이터를 사용하여 좌석 상태 업데이트
+                displayEarliestAvailableSeats(data); // 가장 일찍 끝나는 좌석 표시
+            })
+            .catch(error => {
+                console.error('Error fetching reserved seats:', error);
+            });
+    }
+
+
+    function updateReservedSeats(reservedSeats) {
+        reservedSeats.forEach(seatInfo => {
+            const seatNumber = seatInfo.num;
+            const seat = document.querySelector(`.seating-chart .seat:nth-child(${seatNumber})`);
+            if (seat) {
+                seat.classList.add('reserved');
+                seat.title = `예약 종료 시간: ${new Date(seatInfo.date).toLocaleString()}`;
+            }
+        });
+    }
+
+
+    function displayEarliestAvailableSeats(reservedSeats) {
+        const seatsWithEndTime = reservedSeats.map(seat => ({
+            ...seat,
+            endTime: new Date(seat.date)
+        }));
+
+        seatsWithEndTime.sort((a, b) => a.endTime - b.endTime);
+
+        const availableSeatsList = document.getElementById('availableSeatsList');
+        availableSeatsList.innerHTML = '';
+
+        seatsWithEndTime.forEach((seat, index) => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `좌석 번호: ${seat.num}, 예약 종료 시간: ${seat.endTime.toLocaleTimeString()}`;
+            availableSeatsList.appendChild(listItem);
+        });
+    }
+
+</script>
+</body>
+</html>

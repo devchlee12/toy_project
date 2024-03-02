@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>announcement</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">
+</head>
+<body>
+<nav th:replace="~{navbar :: navbarFragment}"></nav>
+<a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/writeannouncement}" style="display: block;text-align: center;" type="button" class="btn btn-primary" id="b-write">글쓰기</a>
+<div class = "container">
+    <table class = "table table-hover table-striped " style="border:1px solid;">
+        <thead>
+        <tr>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>작성일자</th>
+            <th>조회수</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="announcement : ${announcements}">
+            <td>
+                <a th:href="@{|/announcements/detail/${announcement.postedId}|}">[[${announcement.title}]]</a>
+            </td>
+            <td>[[${announcement.writer}]]</td>
+            <td>[[${#temporals.format(announcement.postedDate,'yyyy-MM-dd')}]]</td>
+            <td>[[${announcement.views}]]</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<script th:src="@{/bootstrap.min.js}"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판의 글</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">
+    <style>
+        #title {
+            text-align: center;
+        }
+        #writer{
+            text-align: center;
+        }
+        .link-muted { color: #aaa; }
+        .link-muted:hover { color: #1266f1; }
+    </style>
+</head>
+<body>
+<h1 id="title" class="mx-auto" th:text="${post.title}"></h1>
+<div id="writer" th:text="|글쓴이 : ${post.writer}|"> </div>
+<a style="display: block; text-align: center;" th:href="@{/posts}" class="btn btn-warning"> 뒤로가기</a>
+<hr>
+<p class="mx-2" th:text="${post.content}"></p>
+<!--여기부터 댓글 확인-->
+<section style="background-color: #ffffff;">
+    <div class="container mt-5 py-5 text-dark">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-11 col-lg-9 col-xl-7">
+                <div class="d-flex flex-start">
+                    <div class="card w-100">
+                        <div class="card-body p-4">
+                            <div th:each="comment:${comments}" class="">
+                                <h5 th:text="${comment.getWriter()}">name</h5>
+                                <p class="small">[[${#temporals.format(comment.commentedDate,'yyyy-MM-dd')}]]</p>
+                                <p th:text="${comment.getContent()}">
+                                    Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque
+                                    ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus
+                                    viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla.
+                                    Donec lacinia congue felis in faucibus ras purus odio, vestibulum in
+                                    vulputate at, tempus viverra turpis.
+                                </p>
+                                <hr>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--여기부터 댓글 작성-->
+<section style="background-color: #ffffff;">
+    <div class="container mb-5 py-5 text-dark">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-6">
+                <div class="card">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-start w-100">
+                            <div class="w-100">
+                                <h5>댓글 남기기</h5>
+                                <form th:action="@{|/writecomment/${post.postedId}|}" method="post">
+                                <div class="form-outline">
+                                    <textarea class="form-control" id="textAreaExample" rows="4" name="content"></textarea>
+                                    <label class="form-label" for="textAreaExample"></label>
+                                </div>
+                                <div class="d-flex justify-content-between mt-3">
+                                    <input type="submit" class="btn btn-success" value="작성">
+                                </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script th:src="@{/bootstrap.min.js}"></script>
+</body>
+</html>

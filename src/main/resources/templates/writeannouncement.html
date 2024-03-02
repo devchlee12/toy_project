@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>공지사항 작성</title>
+    <style>
+        .write {
+            width: 700px; margin: 0 auto;
+            border-top: 3px solid gray; border-bottom: 3px solid gray;
+        }
+        .write input {width: 676px; padding: 10px; margin: 12px auto 0;}
+        .write a {width: 676px; padding: 10px; margin: 12px auto 0;}
+        .write textarea {width: 676px; padding: 10px; margin: 12px auto 0;}
+        .write .text {table-layout: fixed;
+            height: 300px; white-space: pre-line; word-break: break-all;
+        }
+        .write .button {padding: 0 200px; margin: 15px auto;}
+        .write .button a {
+            border: 1px solid black; background: gainsboro;
+            margin: 10px; padding: 5px;
+            text-decoration: none; color: black;
+        }
+        .write .button a:hover {color: blueviolet;}
+        .write p {text-align: center;}
+    </style>
+    <link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">
+</head>
+<body>
+<main>
+    <form class="write" action="/writeannouncement" method="post">
+        <input type="text" name="title" placeholder="제목을 입력해주세요." required>
+        <hr>
+        <textarea type="text" name="content" placeholder="내용을 입력해주세요." class="text" required></textarea>
+        <input class="btn btn-primary" type="submit" th:value="글쓰기">
+        <a class="btn btn-danger my-2" href="/posts">취소</a>
+    </form>
+</main>
+</body>
+</html>

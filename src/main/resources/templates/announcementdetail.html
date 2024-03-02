@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>공지사항의 글</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">
+    <style>
+        #title {
+            text-align: center;
+        }
+        #writer{
+            text-align: center;
+        }
+        .link-muted { color: #aaa; }
+        .link-muted:hover { color: #1266f1; }
+    </style>
+</head>
+<body>
+<h1 id="title" class="mx-auto" th:text="${announcement.title}"></h1>
+<div id="writer" th:text="|글쓴이 : ${announcement.writer}|"> </div>
+<a style="display: block; text-align: center;" th:href="@{/announcements}" class="btn btn-warning"> 뒤로가기</a>
+<hr>
+<p class="mx-2" th:text="${announcement.content}"></p>
+<script th:src="@{/bootstrap.min.js}"></script>
+</body>
+</html>

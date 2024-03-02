@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판</title>
+  <link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">
+</head>
+<body>
+<nav th:replace="~{navbar :: navbarFragment}"></nav>
+<a th:href="@{/writepost}" style="display: block;text-align: center;" type="button" class="btn btn-primary" id="b-write">글쓰기</a>
+<div class = "container">
+  <table class = "table table-hover table-striped " style="border:1px solid;">
+    <thead>
+    <tr>
+      <th>제목</th>
+      <th>작성자</th>
+      <th>작성일자</th>
+      <th>조회수</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="post : ${postList}">
+      <td>
+        <a th:href="@{|/posts/detail/${post.postedId}|}">[[${post.title}]]</a>
+      </td>
+      <td>[[${post.writer}]]</td>
+      <td>[[${#temporals.format(post.postedDate,'yyyy-MM-dd')}]]</td>
+      <td>[[${post.views}]]</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<script th:src="@{/bootstrap.min.js}"></script>
+</body>
+</html>

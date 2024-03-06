@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>네카라인포</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<a class="btn btn-primary" th:href="@{/getinfomanual}">정보 새로고침</a>
+<a class="btn btn-success" th:href="@{/naver}">네이버 채용 정보</a>
+<a class="btn btn-warning" th:href="@{/kakao}">카카오 채용 정보</a>
+<a class="btn btn-dark" th:href="@{/line}">라인 채용 정보</a>
+<div class="list-group">
+    <a th:each="info:${infoList}" class="list-group-item list-group-item-action">
+        <div th:if="${info != null}" class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1" >[[${info.getTitle()}]]</h5>
+            <small >[[${info.getDate()}]]</small>
+        </div>
+        <p th:if="${info != null}" class="mb-1">[[${info.getSubInfos()}]]</p>
+    </a>
+</div>
+</body>
+</html>

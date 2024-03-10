@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>메뉴</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .menu-item {
+      margin-bottom: 30px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .menu-item img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .menu-item .details {
+      padding: 20px;
+    }
+    .menu-item .details h3 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+    .menu-item .details p {
+      margin-bottom: 5px;
+    }
+    .menu-item .details .price {
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+<button class="btn btn-primary w-100" data-toggle="modal" data-target="#orderListModal">주문 목록</button>
+<div class="container">
+  <div class="row">
+    <div class="col-md-6 mx-auto" th:each="menu : ${menus}">
+      <div class="menu-item" th:data-product-id="${menu.productId}" th:data-product-name="${menu.productName}" onclick="showOrderModal(this)">
+        <div class="details">
+          <h3 th:text="${menu.productName}">메뉴 이름</h3>
+          <p class="price" th:text="${menu.price}">10000원</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 주문 모달 -->
+<div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="orderModalLabel">주문 확인</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="orderMessage"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-primary" id="orderBtn">주문</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 주문 목록 모달 -->
+<div class="modal fade" id="orderListModal" tabindex="-1" aria-labelledby="orderListModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="orderListModalLabel">주문 목록</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <ul id="orderList"></ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let selectedProductId, selectedProductName;
+
+  function showOrderModal(menuItem) {
+    selectedProductId = menuItem.dataset.productId;
+    selectedProductName = menuItem.dataset.productName;
+    console.log(selectedProductId);
+
+    const orderMessage = document.getElementById('orderMessage');
+    orderMessage.textContent = `'${selectedProductName}' 을(를) 주문하시겠습니까?`;
+
+    const orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
+    orderModal.show();
+  }
+
+  const tableId = [[${tid}]];
+  const orderBtn = document.getElementById('orderBtn');
+  const url = "/ordersubmit/" + tableId;
+  orderBtn.addEventListener('click', () => {
+    console.log(url)
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ productId: selectedProductId })
+    })
+            .then(response => response.json())
+            .then(data => {
+              console.log('주문 완료:', data);
+              const orderModal = bootstrap.Modal.getInstance(document.getElementById('orderModal'));
+              orderModal.hide();
+              updateOrderList();
+            })
+            .catch(error => {
+              console.error('주문 중 오류 발생:', error);
+            });
+  });
+
+  function updateOrderList() {
+    fetch('/getorderlist')
+            .then(response => response.json())
+            .then(data => {
+              const orderList = document.getElementById('orderList');
+              orderList.innerHTML = '';
+
+              data.forEach(order => {
+                const li = document.createElement('li');
+                li.textContent = order.productName;
+                orderList.appendChild(li);
+              });
+
+              const orderListModal = new bootstrap.Modal(document.getElementById('orderListModal'));
+              orderListModal.show();
+            })
+            .catch(error => {
+              console.error('주문 목록 가져오기 중 오류 발생:', error);
+            });
+  }
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메뉴 관리</title>
+    <style>
+        .menu-item {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .menu-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .menu-item .details {
+            padding: 20px;
+        }
+        .menu-item .details h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        .menu-item .details p {
+            margin-bottom: 5px;
+        }
+        .menu-item .details .price {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+<nav th:replace="~{navbar::navbarFragment}"></nav>
+<button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#addMenuModal">
+    메뉴 추가
+</button>
+<!-- 메뉴 추가 모달 -->
+<div class="modal fade" id="addMenuModal" tabindex="-1" aria-labelledby="addMenuModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMenuModalLabel">메뉴 추가</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="menuName" class="form-label">메뉴 이름</label>
+                        <input type="text" class="form-control" id="menuName" placeholder="메뉴 이름을 입력하세요">
+                    </div>
+                    <div class="mb-3">
+                        <label for="menuPrice" class="form-label">가격</label>
+                        <input type="number" class="form-control" id="menuPrice" placeholder="가격을 입력하세요">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="hideModal(this, 'addMenuModal')">취소</button>
+                <button type="button" class="btn btn-primary" id="addMenuBtn">추가</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div th:each="menu : ${menus}" class="menu-item" th:data-menu-id="${menu.productId}" th:data-menu-name="${menu.productName}" th:data-menu-price="${menu.price}">
+<!--                <img th:src="@{/images/menu_item.jpg}" alt="Menu Item">-->
+                <div class="details">
+                    <h3 th:text="${menu.getProductName()}">메뉴 이름</h3>
+                    <p th:text="${menu.getPrice()}" class="price">10000원</p>
+                </div>
+                <div class="btn btn-warning w-100" onclick="showEditModal(this)">
+                    수정
+                </div>
+                <div class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#deleteMenuModal" onclick="selectDelete(this)">
+                    삭제
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteMenuModal" tabindex="-1" aria-labelledby="deleteMenuModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteMenuModalLabel">메뉴 삭제</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                정말로 메뉴를 삭제하시겠습니까?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="hideModal(this, 'deleteMenuModal')">취소</button>
+                <button type="button" class="btn btn-danger" id="deleteMenuBtn">삭제</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editMenuModal" tabindex="-1" aria-labelledby="editMenuModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editMenuModalLabel">메뉴 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="editMenuName" class="form-label">메뉴 이름</label>
+                        <input type="text" class="form-control" id="editMenuName" placeholder="메뉴 이름을 입력하세요" value="메뉴 이름">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editMenuPrice" class="form-label">가격</label>
+                        <input type="number" class="form-control" id="editMenuPrice" placeholder="가격을 입력하세요" value="10000">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="hideModal(this, 'editMenuModal')">취소</button>
+                <button type="button" class="btn btn-primary" id="editMenuBtn">수정</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function hideModal(button, modalId) {
+        const modalEl = document.getElementById(modalId);
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+        modalEl.addEventListener('hidden.bs.modal', function() {
+            modal.setBackdrop(false);
+        });
+    }
+
+    let selectedMenuId, selectedMenuName, selectedMenuPrice;
+
+    function showEditModal(menuItem) {
+        selectedMenuId = menuItem.parentNode.dataset.menuId;
+        selectedMenuName = menuItem.parentNode.dataset.menuName;
+        selectedMenuPrice = menuItem.parentNode.dataset.menuPrice;
+
+        document.getElementById('editMenuName').value = selectedMenuName;
+        document.getElementById('editMenuPrice').value = selectedMenuPrice;
+
+        const editMenuModal = new bootstrap.Modal(document.getElementById('editMenuModal'));
+        editMenuModal.show();
+    }
+
+    let deleteMenuId;
+
+    function selectDelete(menuItem){
+        deleteMenuId = menuItem.parentNode.dataset.menuId;
+    }
+
+    const addMenuBtn = document.getElementById('addMenuBtn');
+    addMenuBtn.addEventListener('click', () => {
+        const menuName = document.getElementById('menuName').value;
+        const menuPrice = document.getElementById('menuPrice').value;
+
+        fetch('/createmenu', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productName: menuName, price: menuPrice })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('메뉴 추가 완료:', data);
+                // 추가 작업 후 모달 닫기
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addMenuModal'));
+                modal.hide();
+                location.reload(true);
+            })
+            .catch(error => {
+                console.error('메뉴 추가 중 오류 발생:', error);
+            });
+    });
+
+    const deleteMenuBtn = document.getElementById('deleteMenuBtn');
+    deleteMenuBtn.addEventListener('click', () => {
+        fetch('/deletemenu', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productId: deleteMenuId }) // 삭제할 메뉴의 ID를 전송해야 합니다.
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('메뉴 삭제 완료:', data);
+                // 삭제 작업 후 모달 닫기
+                const modal = bootstrap.Modal.getInstance(document.getElementById('deleteMenuModal'));
+                modal.hide();
+                location.reload(true);
+            })
+            .catch(error => {
+                console.error('메뉴 삭제 중 오류 발생:', error);
+            });
+    });
+
+    const editMenuBtn = document.getElementById('editMenuBtn');
+    editMenuBtn.addEventListener('click', () => {
+        const menuName = document.getElementById('editMenuName').value;
+        const menuPrice = document.getElementById('editMenuPrice').value;
+
+        fetch('/updatemenu', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productId: selectedMenuId, productName: menuName, price: menuPrice }) // 수정할 메뉴의 ID와 새로운 이름, 가격을 전송해야 합니다.
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('메뉴 수정 완료:', data);
+                // 수정 작업 후 모달 닫기
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editMenuModal'));
+                modal.hide();
+                location.reload(true);
+            })
+            .catch(error => {
+                console.error('메뉴 수정 중 오류 발생:', error);
+            });
+    });
+
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테이블 관리</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+<nav th:replace="~{navbar::navbarFragment}"></nav>
+<button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#addTableModal">
+    테이블 추가
+</button>
+
+<!-- 테이블 추가 모달 -->
+<div class="modal fade" id="addTableModal" tabindex="-1" aria-labelledby="addTableModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTableModalLabel">테이블 추가</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="tableNumber" class="form-label">테이블 이름</label>
+                        <input type="text" class="form-control" id="tableNumber" placeholder="테이블 이름을 입력하세요">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="createTableBtn">생성</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container text-center m-2">
+    <div class="row my-2" th:each="table : ${tables}" th:data-table-id="${table.tableId}">
+        <div class="col-8 btn btn-primary" th:text="${table.tableName}">
+            테이블x
+        </div>
+        <div class="col-2 btn btn-warning" onclick="generateQRCode(this)">
+            QR코드
+        </div>
+        <div class="col-2 btn btn-danger" onclick="deleteTable(this)">
+            삭제
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrCodeModalLabel">QR 코드</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qrCode"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">뒤로가기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+    const createTableBtn = document.getElementById('createTableBtn');
+    createTableBtn.addEventListener('click', () => {
+        const tableNumber = document.getElementById('tableNumber').value;
+
+        fetch('/createtable', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ tableNumber: tableNumber })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('테이블 생성 완료:', data);
+                // 추가 작업 후 모달 닫기
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addTableModal'));
+                modal.hide();
+                location.reload(true);
+            })
+            .catch(error => {
+                console.error('테이블 생성 중 오류 발생:', error);
+            });
+    });
+
+    function deleteTable(button) {
+        const tableRow = button.parentNode;
+        const tableId = tableRow.dataset.tableId;
+
+        fetch('/deletetable', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ tableId: tableId })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('테이블 삭제 완료:', data);
+                location.reload(true);
+            })
+            .catch(error => {
+                console.error('테이블 삭제 중 오류 발생:', error);
+            });
+    }
+
+    function generateQRCode(button) {
+        const tableRow = button.parentNode;
+        const tableId = tableRow.dataset.tableId;
+
+        const url = window.location.host;
+        // QR 코드 생성 옵션 설정
+        const options = {
+            text: `${url + "/ordermenu/" + tableId}`,
+            width: 200,
+            height: 200,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        };
+
+        const qrCodeElement = document.getElementById("qrCode");
+        while (qrCodeElement.firstChild) {
+            qrCodeElement.removeChild(qrCodeElement.firstChild);
+        }
+
+        // QR 코드 생성
+        const qrCode = new QRCode(document.getElementById("qrCode"), options);
+
+        // 모달 표시
+        const qrCodeModal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+        qrCodeModal.show();
+    }
+</script>
+</body>
+</html>

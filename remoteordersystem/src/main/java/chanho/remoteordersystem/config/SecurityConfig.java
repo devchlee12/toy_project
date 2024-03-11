@@ -30,6 +30,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/ordersubmit/**"))
                         .permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/getorderlist"))
+                        .permitAll()
                         .anyRequest().authenticated())
                 .headers((headers) -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(

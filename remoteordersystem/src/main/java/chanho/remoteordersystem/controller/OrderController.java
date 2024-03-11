@@ -4,9 +4,12 @@ import chanho.remoteordersystem.Service.*;
 import chanho.remoteordersystem.domain.CustomerOrder;
 import chanho.remoteordersystem.domain.Product;
 import chanho.remoteordersystem.domain.Seller;
+import chanho.remoteordersystem.dto.CustomerOrderHistoryDto;
 import chanho.remoteordersystem.dto.EventPayload;
 import chanho.remoteordersystem.dto.OrderHistoryDto;
 import chanho.remoteordersystem.dto.OrderSubmitForm;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -38,7 +41,14 @@ public class OrderController {
 
     @ResponseBody
     @PostMapping("/ordersubmit/{tableId}")
-    public CustomerOrder orderSubmit(@PathVariable Long tableId, @RequestBody OrderSubmitForm orderSubmitForm){
+    public CustomerOrder orderSubmit(@PathVariable Long tableId, @RequestBody OrderSubmitForm orderSubmitForm,HttpServletRequest request){
+        HttpSession session = request.getSession();
+        List<Long> orders = (List<Long>)session.getAttribute("orders");
+        if (orders == null){
+            orders = new ArrayList<>();
+        }
+        orders.add(orderSubmitForm.getProductId());
+        session.setAttribute("orders",orders);
         Long sellerId = tableService.getSellerIdByTableId(tableId);
         CustomerOrder customerOrder = new CustomerOrder(orderSubmitForm.getProductId(), tableId, sellerId);
         orderService.createOrder(customerOrder);
@@ -59,5 +69,21 @@ public class OrderController {
         }
         model.addAttribute("orders",orders);
         return "order_history";
+    }
+
+    @ResponseBody
+    @GetMapping("/getorderlist")
+    public List<String> getOrderList(HttpServletRequest request){
+        HttpSession session = request.getSession();
+        List<String> list = new ArrayList<>();
+        List<Long> sessionOrders = (List<Long>)session.getAttribute("orders");
+        if (sessionOrders == null){
+            return list;
+        }
+        for (Long id : sessionOrders) {
+            Product product = productService.getProductById(id);
+            list.add(product.getProductName());
+        }
+        return list;
     }
 }

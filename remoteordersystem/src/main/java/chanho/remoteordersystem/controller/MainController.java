@@ -12,7 +12,9 @@ import chanho.remoteordersystem.dto.OrderAlarmDto;
 import chanho.remoteordersystem.dto.OrderCompleteForm;
 import chanho.remoteordersystem.dto.QueueDto;
 import chanho.remoteordersystem.dto.TableWithMenuDto;
+import chanho.remoteordersystem.utils.comparator.QueueDtoComparator;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.sql.ast.tree.expression.Collation;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -43,23 +46,22 @@ public class MainController {
     public String main(Principal principal, Model model){
         Seller seller = sellerService.getSellerByEmail(principal.getName());
         List<TableWithMenuDto> tableInfos = new ArrayList<>();
+        List<QueueDto> queue = new ArrayList<>();
         List<SeatTable> allTableBySeller = tableService.getAllTableBySeller(seller.getSellerId());
         for (SeatTable table : allTableBySeller){
             List<CustomerOrder> allOrderByTable = orderService.getAllOrderByTableAndServed(table.getTableId());
             ArrayList<OrderAlarmDto> orderList = new ArrayList<>();
             for (CustomerOrder order : allOrderByTable){
                 Product product = productService.getProductById(order.getProductId());
+                queue.add(new QueueDto(product.getProductName(),table.getTableName(),order.getOrderDate()));
                 orderList.add(new OrderAlarmDto(product.getProductName(),order.getOrderId()));
             }
             tableInfos.add(new TableWithMenuDto(table.getTableName(),orderList));
         }
         model.addAttribute("tableInfos", tableInfos);
-        List<CustomerOrder> allOrderNotServed = orderService.getAllOrderNotServed();
-        List<QueueDto> queue = new ArrayList<>();
-        for (CustomerOrder co : allOrderNotServed){
-            queue.add(new QueueDto(productService.getProductById(co.getProductId()).getProductName(),tableService.getTableById(co.getOrderTable()).getTableName()));
-        }
         //정렬해야함
+        QueueDtoComparator comp = new QueueDtoComparator();
+        Collections.sort(queue,comp);
         model.addAttribute("queue",queue);
         return "seller_main";
     }

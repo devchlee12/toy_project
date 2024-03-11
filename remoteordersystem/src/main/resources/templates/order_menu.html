@@ -33,7 +33,7 @@
   </style>
 </head>
 <body>
-<button class="btn btn-primary w-100" data-toggle="modal" data-target="#orderListModal">주문 목록</button>
+<button class="btn btn-primary w-100" onclick="updateOrderList()">주문 목록</button>
 <div class="container">
   <div class="row">
     <div class="col-md-6 mx-auto" th:each="menu : ${menus}">
@@ -62,7 +62,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
-        <button type="button" class="btn btn-primary" id="orderBtn">주문</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" id="orderBtn">주문</button>
       </div>
     </div>
   </div>
@@ -118,9 +118,6 @@
             .then(response => response.json())
             .then(data => {
               console.log('주문 완료:', data);
-              const orderModal = bootstrap.Modal.getInstance(document.getElementById('orderModal'));
-              orderModal.hide();
-              updateOrderList();
             })
             .catch(error => {
               console.error('주문 중 오류 발생:', error);
@@ -136,7 +133,7 @@
 
               data.forEach(order => {
                 const li = document.createElement('li');
-                li.textContent = order.productName;
+                li.textContent = order;
                 orderList.appendChild(li);
               });
 

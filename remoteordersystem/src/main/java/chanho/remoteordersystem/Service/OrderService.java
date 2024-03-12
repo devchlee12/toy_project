@@ -17,6 +17,7 @@ import java.util.Optional;
 public class OrderService {
     private final OrderRepository orderRepository;
 
+    @Transactional
     public void createOrder(CustomerOrder order){
         orderRepository.save(order);
     }

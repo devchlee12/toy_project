@@ -14,7 +14,7 @@ public class SeatTable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Seller seller;
     @OneToMany(mappedBy = "seatTable", cascade = CascadeType.PERSIST)
     private List<CustomerOrder> orders = new ArrayList<>();

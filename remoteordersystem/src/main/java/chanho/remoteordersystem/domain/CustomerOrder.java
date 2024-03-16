@@ -13,10 +13,10 @@ public class CustomerOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
     private LocalDateTime orderDate;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private SeatTable seatTable;
     private Boolean served;
 

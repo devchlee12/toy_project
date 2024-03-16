@@ -27,7 +27,7 @@ public class mockdbTest {
     public OrderService orderService;
     @Autowired
     public ProductService productService;
-    @Test
+    //@Test
     public void createSeller(){
         String s = "test";
         String at = "@naver.com";

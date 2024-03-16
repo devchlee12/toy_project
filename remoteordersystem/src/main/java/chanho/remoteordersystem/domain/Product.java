@@ -13,7 +13,7 @@ public class Product {
     private Long id;
     private String productName;
     private Long price;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Seller seller;
 
     public void updateProduct(String productName,Long price){

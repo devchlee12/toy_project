@@ -13,7 +13,7 @@ public class CustomerOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Product product;
     private LocalDateTime orderDate;
     @ManyToOne(fetch = FetchType.LAZY)

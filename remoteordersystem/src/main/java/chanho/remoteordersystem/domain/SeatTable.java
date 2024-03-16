@@ -1,11 +1,11 @@
 package chanho.remoteordersystem.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -13,12 +13,15 @@ import lombok.NoArgsConstructor;
 public class SeatTable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long tableId;
-    private Long sellerId;
+    private Long id;
+    @ManyToOne
+    private Seller seller;
+    @OneToMany(mappedBy = "seatTable", cascade = CascadeType.PERSIST)
+    private List<CustomerOrder> orders = new ArrayList<>();
     private String tableName;
 
-    public SeatTable(Long sellerId, String tableName) {
-        this.sellerId = sellerId;
+    public SeatTable(Seller seller, String tableName) {
+        this.seller = seller;
         this.tableName = tableName;
     }
 }

@@ -7,6 +7,7 @@ import chanho.remoteordersystem.domain.Seller;
 import chanho.remoteordersystem.dto.ProductCreateForm;
 import chanho.remoteordersystem.dto.ProductDeleteForm;
 import chanho.remoteordersystem.dto.ProductUpdateForm;
+import chanho.remoteordersystem.dto.ResponseDto.ResponseProduct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @Slf4j
@@ -29,28 +31,29 @@ public class MenuController {
     @GetMapping("/menu_management")
     public String menuManagement(Principal principal, Model model){
         Seller sellerByEmail = sellerService.getSellerByEmail(principal.getName());
-        List<Product> sellerAllProducts = productService.getSellerAllProducts(sellerByEmail.getSellerId());
-        model.addAttribute("menus",sellerAllProducts);
+        List<Product> sellerAllProducts = sellerByEmail.getProductList();
+        List<ResponseProduct> list = sellerAllProducts.stream()
+                .map(product -> new ResponseProduct(product.getId(), product.getProductName(), product.getPrice()))
+                .collect(Collectors.toList());
+        model.addAttribute("menus",list);
         return "manage_menu";
     }
 
     @ResponseBody
     @PostMapping("/createmenu")
-    public Product createMenu(Principal principal, @RequestBody ProductCreateForm productCreateForm){
+    public ResponseProduct createMenu(Principal principal, @RequestBody ProductCreateForm productCreateForm){
         Seller sellerByEmail = sellerService.getSellerByEmail(principal.getName());
-        log.info(productCreateForm.toString());
-        Product product = new Product(productCreateForm.getProductName(), productCreateForm.getPrice(), sellerByEmail.getSellerId());
+        Product product = new Product(productCreateForm.getProductName(), productCreateForm.getPrice(), sellerByEmail);
         productService.createMenu(product);
-        return product;
+        return new ResponseProduct(product.getId(),product.getProductName(),product.getPrice());
     }
 
     @ResponseBody
     @PostMapping("/updatemenu")
-    public Product updateMenu(Principal principal, @RequestBody ProductUpdateForm productUpdateForm){
+    public ResponseProduct updateMenu(Principal principal, @RequestBody ProductUpdateForm productUpdateForm){
         Product productById = productService.getProductById(productUpdateForm.getProductId());
-        productById.updateProduct(productUpdateForm.getProductName(),productUpdateForm.getPrice());
-        productService.updateMenu(productById);
-        return productById;
+        productService.updateMenu(productById, productUpdateForm);
+        return new ResponseProduct(productById.getId(), productById.getProductName(),productById.getPrice());
     }
 
     @ResponseBody

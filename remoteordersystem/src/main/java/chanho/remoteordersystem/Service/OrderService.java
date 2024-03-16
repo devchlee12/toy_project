@@ -1,6 +1,8 @@
 package chanho.remoteordersystem.Service;
 
 import chanho.remoteordersystem.domain.CustomerOrder;
+import chanho.remoteordersystem.domain.SeatTable;
+import chanho.remoteordersystem.domain.Seller;
 import chanho.remoteordersystem.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,21 +25,18 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    public List<CustomerOrder> getAllOrderBySeller(Long sellerId){
-        return orderRepository.findAllBySellerId(sellerId);
+    public List<CustomerOrder> getAllOrderBySeller(Seller seller){
+        List<SeatTable> tableList = seller.getTableList();
+        List<CustomerOrder> list = new ArrayList<>();
+        for (SeatTable table : tableList){
+            List<CustomerOrder> orders = table.getOrders();
+            for (CustomerOrder order : orders){
+                list.add(order);
+            }
+        }
+        return list;
     }
 
-    public List<CustomerOrder> getAllOrderByTable(Long tableId){
-        return orderRepository.findAllByOrderTable(tableId);
-    }
-
-    public List<CustomerOrder> getAllOrderByTableAndServed(Long tableId){
-        return orderRepository.findAllByOrderTableAndServedFalse(tableId);
-    }
-
-    public List<CustomerOrder> getAllOrderNotServed(){
-        return orderRepository.findAllByServedFalse();
-    }
 
     @Transactional
     public void completeOrder(Long orderId){

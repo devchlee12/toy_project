@@ -19,8 +19,9 @@ public class TableService {
     private final TableRepository tableRepository;
 
     @Transactional
-    public void create(SeatTable seatTable){
+    public SeatTable create(SeatTable seatTable){
         tableRepository.save(seatTable);
+        return seatTable;
     }
 
     public List<SeatTable> getAllTableBySeller(Long id){
@@ -30,14 +31,9 @@ public class TableService {
 
     public SeatTable getTableById(Long id){
         Optional<SeatTable> byId = tableRepository.findById(id);
-        return byId.get();
-    }
-
-    public Long getSellerIdByTableId(Long id){
-        Optional<SeatTable> byId = tableRepository.findById(id);
         if (byId.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"seller with the tableId not found");
+            new ResponseStatusException(HttpStatus.BAD_REQUEST,"table not found");
         }
-        return byId.get().getSellerId();
+        return byId.get();
     }
 }

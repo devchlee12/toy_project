@@ -1,11 +1,11 @@
 package chanho.remoteordersystem.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -13,10 +13,15 @@ import lombok.NoArgsConstructor;
 public class Seller {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long sellerId;
+    private Long id;
     private String email;
     private String sellerName;
     private String password;
+    @OneToMany(mappedBy = "seller")
+    List<Product> productList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "seller")
+    List<SeatTable> tableList = new ArrayList<>();
 
     public Seller(String email, String sellerName,String password) {
         this.email = email;

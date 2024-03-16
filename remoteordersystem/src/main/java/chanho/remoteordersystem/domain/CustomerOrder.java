@@ -1,9 +1,6 @@
 package chanho.remoteordersystem.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,18 +12,18 @@ import java.time.LocalDateTime;
 public class CustomerOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderId;
-    private Long productId;
+    private Long id;
+    @ManyToOne
+    private Product product;
     private LocalDateTime orderDate;
-    private Long orderTable;
-    private Long sellerId;
+    @ManyToOne
+    private SeatTable seatTable;
     private Boolean served;
 
-    public CustomerOrder(Long productId, Long orderTable, Long sellerId) {
-        this.productId = productId;
+    public CustomerOrder(Product product, SeatTable seatTable) {
+        this.product = product;
         this.orderDate = LocalDateTime.now();
-        this.orderTable = orderTable;
-        this.sellerId = sellerId;
+        this.seatTable = seatTable;
         this.served = false;
     }
 

@@ -1,6 +1,7 @@
 package chanho.remoteordersystem.Service;
 
 import chanho.remoteordersystem.domain.Product;
+import chanho.remoteordersystem.dto.ProductUpdateForm;
 import chanho.remoteordersystem.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,17 +21,18 @@ public class ProductService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public void createMenu(Product product){
+    public Product createMenu(Product product){
         productRepository.save((product));
+        return product;
     }
 
     @Transactional
-    public void updateMenu(Product product){
-        Optional<Product> updatingProduct = productRepository.findById(product.getProductId());
-        if (updatingProduct.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"product not found");
-        }
-        updatingProduct.get().updateProduct(product.getProductName(),product.getPrice());
+    public void updateMenu(Product product, ProductUpdateForm productUpdateForm){
+//        Optional<Product> updatingProduct = productRepository.findById(product.getProductId());
+//        if (updatingProduct.isEmpty()){
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"product not found");
+//        }
+        product.updateProduct(productUpdateForm.getProductName(),productUpdateForm.getPrice());
     }
 
     @Transactional

@@ -1,9 +1,6 @@
 package chanho.remoteordersystem.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,19 +10,20 @@ import lombok.NoArgsConstructor;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productId;
+    private Long id;
     private String productName;
     private Long price;
-    private Long sellerId;
+    @ManyToOne
+    private Seller seller;
 
     public void updateProduct(String productName,Long price){
         this.productName = productName;
         this.price = price;
     }
 
-    public Product(String productName, Long price, Long sellerId) {
+    public Product(String productName, Long price, Seller seller) {
         this.productName = productName;
         this.price = price;
-        this.sellerId = sellerId;
+        this.seller = seller;
     }
 }

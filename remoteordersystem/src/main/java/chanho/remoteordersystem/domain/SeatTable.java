@@ -3,6 +3,7 @@ package chanho.remoteordersystem.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ public class SeatTable {
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     private Seller seller;
+    @BatchSize(size=100)
     @OneToMany(mappedBy = "seatTable", cascade = CascadeType.PERSIST)
     private List<CustomerOrder> orders = new ArrayList<>();
     private String tableName;

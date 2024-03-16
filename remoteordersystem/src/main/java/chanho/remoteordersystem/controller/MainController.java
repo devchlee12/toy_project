@@ -52,10 +52,10 @@ public class MainController {
         List<TableWithMenuDto> tableInfos = new ArrayList<>();
         List<QueueDto> queue = new ArrayList<>();
 
-        //log.info("getAllTableBySeller Start!");
+        log.info("getAllTableBySeller Start!");
         List<SeatTable> allTableBySeller = seller.getTableList();
-        //log.info("getAllTableBySeller End!");
-        //log.info("테이블이랑 주문목록 Start!");
+        log.info("getAllTableBySeller End!");
+        log.info("테이블이랑 주문목록 Start!");
         for (SeatTable table : allTableBySeller){
             //log.info("table.getOrders Start!");
             List<CustomerOrder> allOrderByTable = table.getOrders();
@@ -71,7 +71,7 @@ public class MainController {
             }
             tableInfos.add(new TableWithMenuDto(table.getTableName(),orderList));
         }
-        //log.info("테이블이랑 주문목록 End!");
+        log.info("테이블이랑 주문목록 End!");
         model.addAttribute("tableInfos", tableInfos);
         //정렬해야함
         QueueDtoComparator comp = new QueueDtoComparator();

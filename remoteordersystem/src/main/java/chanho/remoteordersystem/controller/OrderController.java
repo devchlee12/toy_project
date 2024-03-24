@@ -5,7 +5,6 @@ import chanho.remoteordersystem.domain.CustomerOrder;
 import chanho.remoteordersystem.domain.Product;
 import chanho.remoteordersystem.domain.SeatTable;
 import chanho.remoteordersystem.domain.Seller;
-import chanho.remoteordersystem.dto.CustomerOrderHistoryDto;
 import chanho.remoteordersystem.dto.EventPayload;
 import chanho.remoteordersystem.dto.OrderHistoryDto;
 import chanho.remoteordersystem.dto.OrderSubmitForm;

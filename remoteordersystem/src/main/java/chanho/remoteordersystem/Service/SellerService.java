@@ -38,5 +38,9 @@ public class SellerService {
         }
         return byEmail.get();
     }
-
+    public boolean haveSeller(String email){
+        Optional<Seller> byEmail = sellerRepository.findByEmail(email);
+        if (byEmail.isEmpty()) return false;
+        return true;
+    }
 }
